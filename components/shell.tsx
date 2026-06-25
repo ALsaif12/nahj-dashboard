@@ -51,14 +51,18 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
   const router = useRouter();
   const { t, locale, setLocale, dir } = useI18n();
   const tour = useTour();
+  const tourSetContext = tour.setContext;
   const [refreshing, setRefreshing] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
 
   // Feed the tour engine with current permissions so it can skip steps the
   // signed-in user can't see (e.g. the Admin step for non-CEOs).
+  // NOTE: depend ONLY on the primitive boolean — depending on the whole `tour`
+  // object (which is recreated every render) caused an infinite render loop.
   React.useEffect(() => {
-    tour.setContext({ canAdmin: user.permissions.canAccessAdmin });
-  }, [user.permissions.canAccessAdmin, tour]);
+    tourSetContext({ canAdmin: user.permissions.canAccessAdmin });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.permissions.canAccessAdmin]);
 
   async function refresh() {
     setRefreshing(true);

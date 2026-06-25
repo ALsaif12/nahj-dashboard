@@ -25,7 +25,13 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [active, setActive] = React.useState(false);
   const [stepIndex, setStepIndex] = React.useState(0);
-  const [ctx, setContext] = React.useState({ canAdmin: false });
+  const [ctx, setCtx] = React.useState({ canAdmin: false });
+
+  // Stable, guarded setter: only triggers a re-render if the value actually
+  // changed. Prevents any caller-side render loop from cascading.
+  const setContext = React.useCallback((c: { canAdmin: boolean }) => {
+    setCtx((prev) => (prev.canAdmin === c.canAdmin ? prev : c));
+  }, []);
 
   // Filter steps that don't apply (e.g. admin step for non-CEO users).
   const steps = React.useMemo(
