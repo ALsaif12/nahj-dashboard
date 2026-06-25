@@ -26,25 +26,39 @@ export default function LoginPage() {
   const [busy, setBusy] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  // Shared login routine. Takes credentials explicitly so the Quick Account
+  // tiles can sign in directly without waiting for a setState round-trip.
+  async function performLogin(u: string, p: string) {
     setErr(null); setBusy(true);
     try {
       const r = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: u, password: p }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || t('login.invalid'));
       router.push(data.landing || '/dashboard/executive');
     } catch (e: any) {
       setErr(e.message);
-    } finally {
       setBusy(false);
     }
+    // Note: don't clear busy on success — leave the spinner up until the
+    // route transition completes so users can't double-click.
   }
-  function quick(u: typeof QUICK_ACCOUNTS[number]) { setUsername(u.username); setPassword(u.password); }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    await performLogin(username, password);
+  }
+
+  // One-click sign-in from the Quick Account tiles. Fills the visible fields
+  // (so the inputs reflect what's happening) AND triggers the login.
+  function quick(u: typeof QUICK_ACCOUNTS[number]) {
+    setUsername(u.username);
+    setPassword(u.password);
+    performLogin(u.username, u.password);
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
