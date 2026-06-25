@@ -14,7 +14,11 @@ services:
     runtime: node
     plan: starter            # $7/mo — required for persistent disks and always-on
     region: frankfurt        # closest Render region to Saudi Arabia; change if you prefer
-    buildCommand: npm ci && npm run build
+    # `--include=dev` is required: tailwindcss / postcss / typescript live in
+    # devDependencies and Render sets NODE_ENV=production (below), which would
+    # otherwise cause npm to skip them. Without them the Next build can't
+    # compile CSS or TSX. See https://render.com/docs/node-version
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /login
     autoDeploy: true         # redeploy on every push to the main branch
