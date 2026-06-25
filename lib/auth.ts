@@ -11,10 +11,24 @@ const SECRET = new TextEncoder().encode(
   process.env.NAHJ_SESSION_SECRET || 'nahj-dev-secret-change-me-please-32bytes!'
 );
 
+// Demo accounts that always accept the universal demo password, regardless of
+// what's stored on disk. This keeps the four seed logins working on a deployed
+// instance whose users.json was created with different (env-var) passwords.
+// Set NAHJ_DISABLE_DEMO_LOGIN=1 to turn this off for a real production rollout.
+const DEMO_ACCOUNTS = ['executive', 'badir', 'risala', 'iktashif'];
+const DEMO_PASSWORD = process.env.NAHJ_DEMO_PASSWORD || '1';
+
 export async function authenticate(username: string, password: string): Promise<SessionUser | null> {
   const u = findByUsername(username);
   if (!u || !u.active) return null;
-  if (u.password !== password) return null;
+
+  const passwordOk =
+    u.password === password ||
+    (process.env.NAHJ_DISABLE_DEMO_LOGIN !== '1' &&
+      DEMO_ACCOUNTS.includes(u.username.toLowerCase()) &&
+      password === DEMO_PASSWORD);
+
+  if (!passwordOk) return null;
   return {
     username: u.username,
     role: u.role,
