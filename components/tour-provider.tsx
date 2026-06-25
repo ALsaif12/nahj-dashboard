@@ -33,17 +33,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     [ctx],
   );
 
-  // Auto-show on first visit per device.
-  React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!pathname.startsWith('/dashboard')) return;
-    const seen = window.localStorage.getItem(STORAGE_KEY);
-    if (!seen) {
-      // Slight delay so the page paints first.
-      const t = window.setTimeout(() => setActive(true), 600);
-      return () => window.clearTimeout(t);
-    }
-  }, [pathname]);
+  // Auto-launch disabled — tour only shows when the user clicks "Take a tour"
+  // in the top bar. (Was causing a blank-page issue when the spotlight target
+  // wasn't yet mounted; safer to make it on-demand.)
 
   // Navigate to the step's page if it differs from the current one.
   React.useEffect(() => {
