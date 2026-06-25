@@ -31,6 +31,7 @@ const en = {
   'login.title': 'Sign in',
   'login.subtitle': 'Choose a role or enter your credentials.',
   'login.username': 'Username',
+  'login.usernameHint': 'executive / badir / risala / iktashif',
   'login.password': 'Password',
   'login.brand.headline': 'Strategy, KPIs, risks and programs — in one room.',
   'login.brand.body': 'Three programs, twenty KPIs, fifteen risks and four BSC pillars. Read straight from the strategy workbook, filtered for your team, refreshed on demand.',
@@ -55,6 +56,44 @@ const en = {
   'exec.signals.kpi17.label': 'Operating model completion',
   'exec.signals.kpi19.title': 'KPI 19 · Revenue Diversification',
   'exec.signals.kpi19.label': 'Funding from diverse sources',
+
+  // Guided tour
+  'tour.start': 'Take a tour',
+  'tour.next': 'Next',
+  'tour.prev': 'Back',
+  'tour.skip': 'Skip tour',
+  'tour.done': 'Finish',
+  'tour.step': 'Step {n} of {total}',
+
+  'tour.welcome.title': 'Welcome to the NAHJ Dashboard',
+  'tour.welcome.body': 'A 60-second tour of what each part does. You can skip anytime and re-take it from the top bar.',
+
+  'tour.banner.title': 'Status at a glance',
+  'tour.banner.body': 'These four tiles show the health of every program — KPIs on track, open risks, total budget, and the current reporting quarter. Each tile is clickable: it jumps you straight to that section.',
+
+  'tour.trafficlights.title': 'All 20 KPIs at a glance',
+  'tour.trafficlights.body': 'Every coloured square is one KPI. Green = on track, amber = at risk, red = off track. Hover for the KPI name; click to scroll straight to its card.',
+
+  'tour.programs.title': 'The three programs',
+  'tour.programs.body': 'Badir, Risala, and Iktashif Nahj. Each card shows health, reporting status for the quarter, KPI count, open risks, and budget. Click any card to open that program\'s dedicated panel.',
+
+  'tour.sidebar.title': 'Switch panels here',
+  'tour.sidebar.body': 'The sidebar shows only the panels you\'re allowed to access. Each panel has its own focused sub-pages: Overview, KPIs, Risks, Timeline.',
+
+  'tour.subnav.title': 'Sub-pages inside a panel',
+  'tour.subnav.body': 'Within any panel, use these tabs to drill into KPIs, the risk heatmap, the program timeline, or the strategy scorecard. The number on each tab is live.',
+
+  'tour.admin.title': 'CEO controls',
+  'tour.admin.body': 'Only Executive accounts see this section. Add users, change passwords, define who sees which panel, and review the full audit log of every action.',
+
+  'tour.locale.title': 'Bilingual',
+  'tour.locale.body': 'Click EN / ع anytime to flip the entire interface between English and Arabic. The data values stay in their source language.',
+
+  'tour.live.title': 'Live data sync',
+  'tour.live.body': 'Edit the source Excel file and the dashboard refreshes within seconds — a small toast pops up bottom-right confirming the update.',
+
+  'tour.done.title': 'You\'re ready',
+  'tour.done.body': 'That\'s the whole tour. Click the lightbulb in the top bar to take it again. Have a great demo.',
 
   // Admin panel
   'nav.admin': 'Admin',
@@ -405,6 +444,43 @@ const en = {
 };
 
 const ar: typeof en = {
+  'tour.start': 'جولة سريعة',
+  'tour.next': 'التالي',
+  'tour.prev': 'السابق',
+  'tour.skip': 'تخطّي',
+  'tour.done': 'إنهاء',
+  'tour.step': 'الخطوة {n} من {total}',
+
+  'tour.welcome.title': 'مرحبًا بك في لوحة NAHJ',
+  'tour.welcome.body': 'جولة سريعة في 60 ثانية لشرح كل قسم. يمكنك التخطّي في أي وقت وإعادتها من الشريط العلوي.',
+
+  'tour.banner.title': 'الحالة في لمحة',
+  'tour.banner.body': 'هذه البطاقات الأربع تعرض صحة كل برنامج — المؤشرات المتحققة، المخاطر المفتوحة، الميزانية، والربع الحالي. كل بطاقة قابلة للنقر وتنقلك مباشرة إلى القسم المعني.',
+
+  'tour.trafficlights.title': 'جميع المؤشرات الـ20 بنظرة واحدة',
+  'tour.trafficlights.body': 'كل مربع ملوّن يمثل مؤشرًا. أخضر = متحقق، أصفر = ضمن النطاق، أحمر = خارج النطاق. مرّر لرؤية الاسم، واضغط للتمرير إلى البطاقة.',
+
+  'tour.programs.title': 'البرامج الثلاثة',
+  'tour.programs.body': 'بادر، رسالة، واكتشف نهجك. كل بطاقة تعرض الحالة الصحية، حالة الإبلاغ للربع، عدد المؤشرات، المخاطر، والميزانية. اضغط أي بطاقة لفتح لوحة البرنامج.',
+
+  'tour.sidebar.title': 'تبديل اللوحات من هنا',
+  'tour.sidebar.body': 'يعرض الشريط الجانبي فقط اللوحات المسموح لك بدخولها. كل لوحة تحتوي صفحات فرعية: نظرة عامة، المؤشرات، المخاطر، الجدول الزمني.',
+
+  'tour.subnav.title': 'الصفحات الفرعية داخل اللوحة',
+  'tour.subnav.body': 'داخل أي لوحة، استخدم هذه التبويبات للتنقل بين المؤشرات وخريطة المخاطر والجدول الزمني وبطاقة الأداء الاستراتيجي.',
+
+  'tour.admin.title': 'تحكّم المدير التنفيذي',
+  'tour.admin.body': 'فقط الحسابات التنفيذية ترى هذا القسم. أضف مستخدمين، غيّر كلمات المرور، حدّد من يرى ماذا، وراجع سجل التدقيق الكامل.',
+
+  'tour.locale.title': 'ثنائي اللغة',
+  'tour.locale.body': 'اضغط EN / ع في أي لحظة لتقليب الواجهة بأكملها. تبقى قيم البيانات بلغتها الأصلية.',
+
+  'tour.live.title': 'مزامنة مباشرة',
+  'tour.live.body': 'عدّل ملف Excel وستتحدث اللوحة خلال ثوانٍ — يظهر إشعار صغير أسفل الشاشة يؤكد التحديث.',
+
+  'tour.done.title': 'أنت جاهز',
+  'tour.done.body': 'انتهت الجولة. اضغط أيقونة المصباح في الشريط العلوي لإعادتها. عرض موفق.',
+
   'nav.admin': 'الإدارة',
   'admin.title': 'لوحة الإدارة',
   'admin.description': 'إدارة المستخدمين والصلاحيات وسجل التدقيق. مرئية للمدير التنفيذي فقط.',
@@ -520,6 +596,7 @@ const ar: typeof en = {
   'login.title': 'تسجيل الدخول',
   'login.subtitle': 'اختر دورك أو أدخل بياناتك.',
   'login.username': 'اسم المستخدم',
+  'login.usernameHint': 'executive / badir / risala / iktashif',
   'login.password': 'كلمة المرور',
   'login.brand.headline': 'الاستراتيجية والمؤشرات والمخاطر والبرامج — في مكان واحد.',
   'login.brand.body': 'ثلاثة برامج، وعشرون مؤشرًا، وخمسة عشر خطرًا، وأربعة محاور استراتيجية. تُقرأ مباشرة من ملف الاستراتيجية، ومُصفّاة لفريقك، وتُحدَّث عند الطلب.',

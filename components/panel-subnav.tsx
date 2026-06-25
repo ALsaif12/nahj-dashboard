@@ -24,7 +24,7 @@ export function PanelSubnav({ items }: { items: SubNavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <div className="relative mb-6">
+    <div className="relative mb-6" data-tour="subnav">
       <div className="glass rounded-2xl p-1.5 inline-flex flex-wrap gap-1 max-w-full">
         {items.map((it) => {
           const active = pathname === it.href || pathname.startsWith(`${it.href}/`);

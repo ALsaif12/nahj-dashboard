@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Cairo, Fraunces } from 'next/font/google';
 import './globals.css';
 import { I18nProvider } from '@/components/i18n-provider';
+import { TourProvider } from '@/components/tour-provider';
 import { getServerLocale } from '@/lib/locale-server';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={locale} dir={dir} className={`${inter.variable} ${cairo.variable} ${fraunces.variable}`}>
       <body>
-        <I18nProvider initialLocale={locale}>{children}</I18nProvider>
+        <I18nProvider initialLocale={locale}>
+          <TourProvider>{children}</TourProvider>
+        </I18nProvider>
       </body>
     </html>
   );

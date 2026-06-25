@@ -10,11 +10,12 @@ import { NahjLogo } from '@/components/nahj-logo';
 import { useI18n } from '@/components/i18n-provider';
 import { cn } from '@/lib/utils';
 
+// Demo defaults. Real passwords managed via Admin → Users once signed in.
 const QUICK_ACCOUNTS = [
-  { username: 'executive', password: 'nahj-exec', labelKey: 'login.acct.executive', subKey: 'login.acct.executiveSub' },
-  { username: 'badir', password: 'nahj-badir', labelKey: 'nav.badir', subKey: 'login.acct.badirSub' },
-  { username: 'risala', password: 'nahj-risala', labelKey: 'nav.risala', subKey: 'login.acct.risalaSub' },
-  { username: 'iktashif', password: 'nahj-iktashif', labelKey: 'nav.iktashif', subKey: 'login.acct.iktashifSub' },
+  { username: 'executive', password: '1', labelKey: 'login.acct.executive', subKey: 'login.acct.executiveSub' },
+  { username: 'badir', password: '1', labelKey: 'nav.badir', subKey: 'login.acct.badirSub' },
+  { username: 'risala', password: '1', labelKey: 'nav.risala', subKey: 'login.acct.risalaSub' },
+  { username: 'iktashif', password: '1', labelKey: 'nav.iktashif', subKey: 'login.acct.iktashifSub' },
 ] as const;
 
 export default function LoginPage() {
@@ -119,7 +120,26 @@ export default function LoginPage() {
               <form onSubmit={submit} className="space-y-4">
                 <div>
                   <Label htmlFor="u">{t('login.username')}</Label>
-                  <Input id="u" autoFocus value={username} onChange={(e) => setUsername(e.target.value)} className="mt-1.5" required />
+                  <Input
+                    id="u"
+                    autoFocus
+                    list="username-options"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder={t('login.usernameHint')}
+                    className="mt-1.5"
+                    required
+                  />
+                  {/*
+                    Native HTML5 datalist — the browser shows these as a dropdown
+                    when the user focuses or starts typing in the field. Works in
+                    every modern browser without needing a custom popover.
+                  */}
+                  <datalist id="username-options">
+                    {QUICK_ACCOUNTS.map((u) => (
+                      <option key={u.username} value={u.username} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <Label htmlFor="p">{t('login.password')}</Label>

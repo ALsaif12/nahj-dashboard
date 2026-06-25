@@ -70,7 +70,7 @@ function seed(): Store {
       {
         id: 'u_executive',
         username: 'executive',
-        password: process.env.NAHJ_PW_EXEC || 'nahj-exec',
+        password: process.env.NAHJ_PW_EXEC || '1',
         name: 'Fahad — Executive Director',
         email: 'executive@nahj.org',
         role: 'ceo',
@@ -83,7 +83,7 @@ function seed(): Store {
       {
         id: 'u_badir',
         username: 'badir',
-        password: process.env.NAHJ_PW_BADIR || 'nahj-badir',
+        password: process.env.NAHJ_PW_BADIR || '1',
         name: 'Badir Program Manager',
         email: 'badir@nahj.org',
         role: 'program-manager',
@@ -96,7 +96,7 @@ function seed(): Store {
       {
         id: 'u_risala',
         username: 'risala',
-        password: process.env.NAHJ_PW_RISALA || 'nahj-risala',
+        password: process.env.NAHJ_PW_RISALA || '1',
         name: 'Risala Program Manager',
         email: 'risala@nahj.org',
         role: 'program-manager',
@@ -109,7 +109,7 @@ function seed(): Store {
       {
         id: 'u_iktashif',
         username: 'iktashif',
-        password: process.env.NAHJ_PW_IKTASHIF || 'nahj-iktashif',
+        password: process.env.NAHJ_PW_IKTASHIF || '1',
         name: 'Iktashif Nahj Program Manager',
         email: 'iktashif@nahj.org',
         role: 'program-manager',

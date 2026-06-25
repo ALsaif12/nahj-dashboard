@@ -23,6 +23,7 @@ export function ExecutiveOverview({ stats, perProgram, projects }: Props) {
   return (
     <div className="space-y-8">
       {/* Status banner — clickable tiles route to the corresponding sub-page */}
+      <div data-tour="status-banner">
       <StatusBanner
         onTrack={stats.onTrack}
         totalKpis={stats.totalKpis}
@@ -35,6 +36,7 @@ export function ExecutiveOverview({ stats, perProgram, projects }: Props) {
         scope="executive"
         basePath="/dashboard/executive"
       />
+      </div>
 
       {/* Program summary cards */}
       <section>
@@ -53,7 +55,7 @@ export function ExecutiveOverview({ stats, perProgram, projects }: Props) {
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div data-tour="program-cards" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {perProgram.map(({ project, kpis, risks }, i) => (
             <ProgramSummaryCard
               key={project.key}

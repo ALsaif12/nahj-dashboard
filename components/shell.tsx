@@ -6,8 +6,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Users, Megaphone, Compass, LogOut, RefreshCw, Loader2,
-  PanelLeftClose, PanelLeftOpen, Home, ChevronRight, Languages, ChevronLeft, ShieldCheck,
+  PanelLeftClose, PanelLeftOpen, Home, ChevronRight, Languages, ChevronLeft, ShieldCheck, Lightbulb,
 } from 'lucide-react';
+import { useTour } from './tour-provider';
+import { TourOverlay } from './tour-overlay';
 import type { SessionUser } from '@/lib/types';
 import { canAccessPanel, landingPath } from '@/lib/permissions';
 import type { PanelKey } from '@/lib/permissions';
@@ -48,8 +50,15 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const { t, locale, setLocale, dir } = useI18n();
+  const tour = useTour();
   const [refreshing, setRefreshing] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState(false);
+
+  // Feed the tour engine with current permissions so it can skip steps the
+  // signed-in user can't see (e.g. the Admin step for non-CEOs).
+  React.useEffect(() => {
+    tour.setContext({ canAdmin: user.permissions.canAccessAdmin });
+  }, [user.permissions.canAccessAdmin, tour]);
 
   async function refresh() {
     setRefreshing(true);
@@ -81,6 +90,7 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
   return (
     <div className="min-h-screen flex">
       <motion.aside
+        data-tour="sidebar"
         animate={{ width: collapsed ? 72 : 280 }}
         transition={{ type: 'spring', stiffness: 280, damping: 30 }}
         className="hidden md:flex shrink-0 flex-col relative glass-strong border-e border-white/10"
@@ -125,6 +135,7 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
                 key={n.href}
                 href={n.href}
                 title={collapsed ? t(n.labelKey) : undefined}
+                data-tour={n.isAdmin ? 'admin-link' : undefined}
                 className={cn(
                   'flex items-center gap-3 rounded-lg text-sm font-medium transition-all group relative',
                   collapsed ? 'h-11 justify-center' : 'px-3 py-2.5',
@@ -193,7 +204,17 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant="outline" className="font-mono text-[10px] hidden sm:inline-flex">{user.role.toUpperCase()}</Badge>
 
-            <div className="inline-flex items-center glass rounded-lg p-0.5" role="group" aria-label="Language">
+            <button
+              type="button"
+              onClick={() => tour.start()}
+              className="hidden sm:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium text-nahj-gold-soft hover:text-white hover:bg-nahj-gold/15 transition-colors"
+              title={t('tour.start')}
+              aria-label={t('tour.start')}
+            >
+              <Lightbulb className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">{t('tour.start')}</span>
+            </button>
+            <div data-tour="locale-toggle" className="inline-flex items-center glass rounded-lg p-0.5" role="group" aria-label="Language">
               <button
                 onClick={() => setLocale('en')}
                 className={cn(
@@ -229,6 +250,7 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
         </main>
 
         <LiveUpdateToast />
+        <TourOverlay />
       </div>
     </div>
   );
