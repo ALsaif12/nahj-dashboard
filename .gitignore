@@ -1,0 +1,22 @@
+node_modules
+.next
+.env
+.env.local
+*.log
+.DS_Store
+
+# Locally-written stores — generated on first boot of dev / Render.
+# Render writes to /var/lib/nahj-data so these only exist in local dev anyway.
+data/actuals.json
+data/actuals.json.tmp
+data/users.json
+data/users.json.tmp
+data/audit.json
+data/audit.json.tmp
+
+# Internal scratch from earlier debugging sessions
+nahj_full_dump.txt
+nahj_dump.py
+scripts/dump-*.py
+scripts/dump-*.mjs
+scripts/verify-*.py

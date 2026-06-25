@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark glass theme — the only theme. The CSS variables below are wired into
+       Tailwind's hsl() colour tokens (background/foreground/card/etc.), which lets
+       us flip surface colours globally without rewriting every component. */
+    --background: 213 65% 7%;          /* deep navy — see body gradient below */
+    --foreground: 210 30% 98%;         /* near-white text */
+
+    --card: 210 30% 98%;               /* used as card foreground; surface uses .glass */
+    --card-foreground: 210 30% 98%;
+
+    --popover: 213 50% 8%;
+    --popover-foreground: 210 30% 98%;
+
+    --primary: 44 50% 62%;             /* gold accent */
+    --primary-foreground: 213 65% 7%;
+
+    --secondary: 213 35% 18%;
+    --secondary-foreground: 210 30% 95%;
+
+    --muted: 213 30% 18%;
+    --muted-foreground: 213 15% 70%;   /* white at 60-ish, desaturated */
+
+    --accent: 44 50% 62%;
+    --accent-foreground: 213 65% 10%;
+
+    --border: 0 0% 100%;               /* combined with /10 utility */
+    --input: 213 35% 22%;
+    --ring: 44 50% 62%;
+
+    --radius: 0.875rem;
+  }
+
+  * { border-color: rgba(255, 255, 255, 0.1); }
+
+  html, body { height: 100%; }
+  body {
+    @apply text-foreground antialiased;
+    /* Deep navy gradient backdrop. Anchored top-left so the gold/teal glows bleed correctly. */
+    background:
+      radial-gradient(circle at 15% -10%, rgba(212, 185, 106, 0.12), transparent 55%),
+      radial-gradient(circle at 90% 110%, rgba(58, 138, 157, 0.18), transparent 60%),
+      linear-gradient(180deg, #0A1628 0%, #050B14 100%);
+    background-attachment: fixed;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+  }
+  :lang(ar), [dir='rtl'] { font-family: var(--font-cairo), Tahoma, Arial, sans-serif; }
+  .font-arabic { font-weight: 500; letter-spacing: -0.005em; }
+  h1, h2, h3, h4 { @apply font-serif tracking-tight text-white; }
+  [dir='rtl'] h1, [dir='rtl'] h2, [dir='rtl'] h3, [dir='rtl'] h4 {
+    font-family: var(--font-cairo), Tahoma, Arial, sans-serif;
+  }
+}
+
+@layer components {
+  /* === Glass surfaces ===
+     Three intensities, all stack a faint inner highlight on top of a translucent
+     fill. They work over any backdrop because of backdrop-filter; mind that the
+     element MUST be positioned (relative/absolute/fixed) for blur to render in
+     Safari. */
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+      0 4px 24px rgba(0, 0, 0, 0.45);
+  }
+  .glass-card {
+    @apply rounded-2xl glass relative overflow-hidden transition-all duration-300;
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02) 50%, rgba(212,185,106,0.10));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(212, 185, 106, 0.18);
+  }
+  .glass-card-strong {
+    @apply rounded-2xl glass-strong relative overflow-hidden transition-all duration-300;
+  }
+
+  /* Frosted overlay for hero strips (vision/mission, status banner, etc.) */
+  .glass-hero {
+    background:
+      linear-gradient(135deg, rgba(212, 185, 106, 0.08), rgba(58, 138, 157, 0.05) 60%, rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.10),
+      0 6px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Glowing dot — subtle pulsing accent used for live/critical signals. */
+  .pulse-dot {
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.35;
+    animation: pulse-glow 1.8s ease-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%   { transform: scale(0.8); opacity: 0.45; }
+    70%  { transform: scale(1.5); opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* Skeleton shimmer used for loading states (kept for parity). */
+  .nahj-skeleton {
+    @apply relative overflow-hidden bg-white/5 rounded-md;
+    background-image: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* KPI card highlight pulse on deep-link scroll. */
+  @keyframes nahj-flash {
+    0%   { box-shadow: 0 0 0 0 rgba(212, 185, 106, 0.55); }
+    50%  { box-shadow: 0 0 0 6px rgba(212, 185, 106, 0.0), 0 0 0 2px rgba(212, 185, 106, 0.55); }
+    100% { box-shadow: 0 0 0 0 rgba(212, 185, 106, 0); }
+  }
+  .kpi-flash > * { animation: nahj-flash 1.6s ease-out 1; }
+
+  /* Backdrop dot pattern, used sparingly for hero blocks. */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }

@@ -1,0 +1,39 @@
+# Render blueprint. Imported via the Render dashboard ("New + → Blueprint").
+#
+# This deploys a single Node web service with a 1 GB persistent disk for the
+# JSON stores (users / actuals / audit). The Excel workbook ships in the repo
+# at data/nahj.xlsx — to update it after launch, commit a new file and push;
+# Render auto-redeploys.
+#
+# The four NAHJ_PW_* values are marked `sync: false` so they're filled in by
+# hand in the Render dashboard, not committed to Git.
+
+services:
+  - type: web
+    name: nahj-dashboard
+    runtime: node
+    plan: starter            # $7/mo — required for persistent disks and always-on
+    region: frankfurt        # closest Render region to Saudi Arabia; change if you prefer
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /login
+    autoDeploy: true         # redeploy on every push to the main branch
+    disk:
+      name: nahj-data
+      mountPath: /var/lib/nahj-data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NAHJ_DATA_DIR
+        value: /var/lib/nahj-data
+      - key: NAHJ_SESSION_SECRET
+        generateValue: true   # Render generates a strong random secret on first deploy
+      - key: NAHJ_PW_EXEC
+        sync: false
+      - key: NAHJ_PW_BADIR
+        sync: false
+      - key: NAHJ_PW_RISALA
+        sync: false
+      - key: NAHJ_PW_IKTASHIF
+        sync: false
