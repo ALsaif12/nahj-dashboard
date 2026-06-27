@@ -127,18 +127,23 @@ function seed(): Store {
   return { users: demoUsers() };
 }
 
+const DEMO_USERNAMES = new Set(['executive', 'badir', 'risala', 'iktashif']);
+
 /**
- * Guarantee the four built-in accounts always exist. If the persisted
- * users.json is missing one (corrupt disk, partial write, hand-editing on a
- * deployed host, etc.), the default is merged back in. Disk versions take
- * precedence when present, so admin edits to name/role/permissions are kept.
- * This is what makes the demo logins bulletproof on Render regardless of the
- * persistent disk's state.
+ * Guarantee the four built-in accounts always exist AND stay usable. If the
+ * persisted users.json is missing one (corrupt disk, partial write, hand-edit),
+ * the default is merged back in. And if a built-in account was accidentally
+ * deactivated (e.g. via the admin panel during a demo), it is re-activated so
+ * the demo logins can never be locked out. Other fields (name/role/permissions)
+ * from disk are preserved, so deliberate admin edits still apply.
  */
 function ensureDemoAccounts(users: UserRecord[]): UserRecord[] {
   const byUsername = new Set(users.map((u) => u.username.toLowerCase()));
+  const repaired = users.map((u) =>
+    DEMO_USERNAMES.has(u.username.toLowerCase()) && !u.active ? { ...u, active: true } : u
+  );
   const missing = demoUsers().filter((d) => !byUsername.has(d.username.toLowerCase()));
-  return missing.length ? [...users, ...missing] : users;
+  return missing.length ? [...repaired, ...missing] : repaired;
 }
 
 function read(): Store {
