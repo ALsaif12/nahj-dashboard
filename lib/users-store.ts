@@ -130,20 +130,46 @@ function seed(): Store {
 const DEMO_USERNAMES = new Set(['executive', 'badir', 'risala', 'iktashif']);
 
 /**
- * Guarantee the four built-in accounts always exist AND stay usable. If the
- * persisted users.json is missing one (corrupt disk, partial write, hand-edit),
- * the default is merged back in. And if a built-in account was accidentally
- * deactivated (e.g. via the admin panel during a demo), it is re-activated so
- * the demo logins can never be locked out. Other fields (name/role/permissions)
- * from disk are preserved, so deliberate admin edits still apply.
+ * Guarantee the four built-in accounts always exist AND enforce their canonical
+ * role/scope/permissions/active state, ignoring any drift on disk.
+ *
+ * Why force, not merge: these are fixed-meaning accounts. `executive` must be a
+ * full CEO; each program manager must see ONLY their own program — never the
+ * Executive panel or another program. Earlier admin/demo edits had left e.g.
+ * `risala` with canAccessExecutive=true, which let a program manager open the
+ * Executive panel. Re-deriving from the canonical definition on every read
+ * makes the access model bulletproof regardless of disk state.
+ *
+ * Preserved from disk: name, email, and password (so a CEO can rename or change
+ * the password of a built-in account and it sticks). Everything access-related
+ * is canonical.
  */
 function ensureDemoAccounts(users: UserRecord[]): UserRecord[] {
-  const byUsername = new Set(users.map((u) => u.username.toLowerCase()));
-  const repaired = users.map((u) =>
-    DEMO_USERNAMES.has(u.username.toLowerCase()) && !u.active ? { ...u, active: true } : u
-  );
-  const missing = demoUsers().filter((d) => !byUsername.has(d.username.toLowerCase()));
-  return missing.length ? [...repaired, ...missing] : repaired;
+  const canon = new Map(demoUsers().map((d) => [d.username.toLowerCase(), d]));
+  const seen = new Set<string>();
+
+  const normalized = users.map((u) => {
+    const key = u.username.toLowerCase();
+    const def = canon.get(key);
+    if (!def) return u; // not a built-in account — leave fully as-is
+    seen.add(key);
+    return {
+      ...u,
+      // keep disk identity + credentials
+      name: u.name,
+      email: u.email,
+      password: u.password,
+      // force the access model to canonical
+      role: def.role,
+      scope: def.scope,
+      permissions: def.permissions,
+      active: true,
+    };
+  });
+
+  // Add any built-in accounts missing from disk entirely.
+  const missing = demoUsers().filter((d) => !seen.has(d.username.toLowerCase()));
+  return missing.length ? [...normalized, ...missing] : normalized;
 }
 
 function read(): Store {
