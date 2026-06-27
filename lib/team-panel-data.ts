@@ -5,7 +5,8 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 import { getSession } from './auth';
 import { getPanelData } from './data-service';
-import { canAccessPanel, canSubmitActuals as canSubmit, landingPath } from './permissions';
+import { canAccessPanel, canSubmitActuals as canSubmit, canManageTasks, landingPath } from './permissions';
+import { tasksByProgram } from './tasks-store';
 import type { ProgramKey } from './types';
 
 export async function loadTeamPanel(programKey: ProgramKey) {
@@ -18,6 +19,12 @@ export async function loadTeamPanel(programKey: ProgramKey) {
   const kpis = wb.kpis.filter((k) => k.programs.includes(programKey));
   const risks = wb.risks.filter((r) => r.programKey === programKey);
   const canSubmitActuals = canSubmit(user, [programKey]);
+  const openTasks = tasksByProgram(programKey).filter((t) => t.status !== 'done').length;
 
-  return { user, workbook: wb, project, kpis, risks, canSubmit: canSubmitActuals };
+  return {
+    user, workbook: wb, project, kpis, risks,
+    canSubmit: canSubmitActuals,
+    canManageTasks: canManageTasks(user, programKey),
+    openTasks,
+  };
 }

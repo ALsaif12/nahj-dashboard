@@ -4,26 +4,38 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import {
   AlertOctagon, AlertTriangle, Clock, ChevronRight, Calendar, CheckCircle2,
+  ListChecks, CalendarClock, UserCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import type { Kpi, Risk, Project } from '@/lib/types';
+import type { Kpi, Risk, Project, Task, ProgramKey } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { cn, currentQuarter, formatDate, formatValue, ragStatus, effectiveActual, RISK_COLORS } from '@/lib/utils';
 import { useI18n } from './i18n-provider';
 import { flashKpiCard } from './traffic-light-strip';
+import { isOverdue } from '@/lib/task-ui';
 
 interface Props {
   kpis: Kpi[];
   risks: Risk[];
   projects: Project[];
+  tasks?: Task[];
+  viewer?: { username: string; managePrograms: ProgramKey[] };
   onSelectRisk?: (r: Risk) => void;
 }
 
-export function AtAGlance({ kpis, risks, projects, onSelectRisk }: Props) {
+export function AtAGlance({ kpis, risks, projects, tasks = [], viewer, onSelectRisk }: Props) {
   const { t, locale } = useI18n();
   const cq = currentQuarter();
   const today = Date.now();
+
+  const overdueTasks = tasks.filter((tk) => isOverdue(tk));
+  const reviewTasks = viewer
+    ? tasks.filter((tk) => tk.status === 'in-review' && viewer.managePrograms.includes(tk.programKey))
+    : [];
+  const myOpenTasks = viewer
+    ? tasks.filter((tk) => tk.assignee === viewer.username && tk.status !== 'done')
+    : [];
 
   const urgentRisks = risks.filter((r) => r.band === 'critical' || r.band === 'high').sort((a, b) => b.score - a.score);
 
@@ -54,7 +66,8 @@ export function AtAGlance({ kpis, risks, projects, onSelectRisk }: Props) {
   }
   overdueMilestones.sort((a, b) => new Date(a.end).getTime() - new Date(b.end).getTime());
 
-  const allClear = urgentRisks.length === 0 && offTrack.length === 0 && missingCq.length === 0 && overdueMilestones.length === 0;
+  const allClear = urgentRisks.length === 0 && offTrack.length === 0 && missingCq.length === 0
+    && overdueMilestones.length === 0 && overdueTasks.length === 0 && reviewTasks.length === 0 && myOpenTasks.length === 0;
 
   if (allClear) {
     return (
@@ -213,7 +226,58 @@ export function AtAGlance({ kpis, risks, projects, onSelectRisk }: Props) {
           ))}
         </AlertCard>
       )}
+
+      {overdueTasks.length > 0 && (
+        <AlertCard
+          icon={<CalendarClock className="h-5 w-5" />}
+          accent="red"
+          title={t('glance.overdueTasks.title')}
+          subtitle={t('glance.overdueTasks.subtitle', { count: overdueTasks.length })}
+        >
+          {overdueTasks.slice(0, 5).map((tk, i) => <TaskRow key={tk.id} task={tk} i={i} href={`/dashboard/${tk.programKey}/tasks`} danger />)}
+        </AlertCard>
+      )}
+
+      {reviewTasks.length > 0 && (
+        <AlertCard
+          icon={<UserCheck className="h-5 w-5" />}
+          accent="gold"
+          title={t('glance.needsReview.title')}
+          subtitle={t('glance.needsReview.subtitle', { count: reviewTasks.length })}
+        >
+          {reviewTasks.slice(0, 5).map((tk, i) => <TaskRow key={tk.id} task={tk} i={i} href={`/dashboard/${tk.programKey}/tasks`} />)}
+        </AlertCard>
+      )}
+
+      {myOpenTasks.length > 0 && (
+        <AlertCard
+          icon={<ListChecks className="h-5 w-5" />}
+          accent="teal"
+          title={t('glance.assignedToMe.title')}
+          subtitle={t('glance.assignedToMe.subtitle', { count: myOpenTasks.length })}
+        >
+          {myOpenTasks.slice(0, 5).map((tk, i) => <TaskRow key={tk.id} task={tk} i={i} href="/dashboard/my-tasks" />)}
+        </AlertCard>
+      )}
     </div>
+  );
+}
+
+function TaskRow({ task, i, href, danger }: { task: Task; i: number; href: string; danger?: boolean }) {
+  const { t } = useI18n();
+  return (
+    <motion.div initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
+      <Link href={href} className="w-full text-start rounded-lg glass p-2.5 hover:bg-white/[0.07] transition-all flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium text-white/95 line-clamp-1">{task.title}</div>
+          <div className="text-[10px] text-white/55 mt-0.5">
+            {t(`nav.${task.programKey}` as any)}
+            {task.dueDate && <span className={cn('ms-2', danger && 'text-red-300')}>{formatDate(task.dueDate)}</span>}
+          </div>
+        </div>
+        <ChevronRight className="h-3.5 w-3.5 text-white/35 shrink-0" />
+      </Link>
+    </motion.div>
   );
 }
 
@@ -221,28 +285,24 @@ function AlertCard({
   icon, accent, title, subtitle, children,
 }: {
   icon: React.ReactNode;
-  accent: 'red' | 'amber';
+  accent: 'red' | 'amber' | 'gold' | 'teal';
   title: string;
   subtitle: string;
   children: React.ReactNode;
 }) {
+  const blob = accent === 'red' ? 'bg-rag-red' : accent === 'amber' ? 'bg-rag-amber' : accent === 'gold' ? 'bg-nahj-gold' : 'bg-nahj-teal';
+  const glow = accent === 'red' ? '0 0 16px rgba(239,68,68,0.5)'
+    : accent === 'amber' ? '0 0 16px rgba(245,158,11,0.5)'
+    : accent === 'gold' ? '0 0 16px rgba(212,185,106,0.5)'
+    : '0 0 16px rgba(94,208,196,0.5)';
   return (
     <Card className="relative overflow-hidden">
-      <div
-        className={cn(
-          'pointer-events-none absolute -top-12 -end-12 h-32 w-32 rounded-full blur-3xl opacity-40',
-          accent === 'red' && 'bg-rag-red',
-          accent === 'amber' && 'bg-rag-amber',
-        )}
-      />
+      <div className={cn('pointer-events-none absolute -top-12 -end-12 h-32 w-32 rounded-full blur-3xl opacity-40', blob)} />
       <CardHeader className="border-b border-white/10 relative">
         <div className="flex items-start gap-3">
           <div
-            className={cn('h-9 w-9 rounded-lg flex items-center justify-center text-white shrink-0',
-              accent === 'red' && 'bg-rag-red',
-              accent === 'amber' && 'bg-rag-amber',
-            )}
-            style={{ boxShadow: accent === 'red' ? '0 0 16px rgba(239,68,68,0.5)' : '0 0 16px rgba(245,158,11,0.5)' }}
+            className={cn('h-9 w-9 rounded-lg flex items-center justify-center text-white shrink-0', blob)}
+            style={{ boxShadow: glow }}
           >{icon}</div>
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base">{title}</CardTitle>

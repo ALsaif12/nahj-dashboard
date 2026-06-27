@@ -11,7 +11,8 @@ export type ProgramKey = 'badir' | 'risala' | 'iktashif';
  */
 export type Role =
   | 'ceo'              // sees and edits everything; only role with admin access by default
-  | 'program-manager'  // scoped to one program; primary job is submitting actuals
+  | 'program-manager'  // team head: scoped to one program; manages tasks + submits actuals
+  | 'team-member'      // scoped to one program; advances only tasks assigned to them
   | 'board-member'     // read-only executive view + strategy + budget summary
   | 'viewer'           // generic read-only access (assignable to any subset of panels)
   | 'sponsor';         // external, scoped to one program they fund
@@ -197,4 +198,70 @@ export interface SessionUser {
   displayName: string;
   permissions: UserPermissions;
   scope: ProgramKey | null;
+}
+
+// ===== Task manager =====
+//
+// Tasks are the execution layer on top of the (read-only) strategy data. Each
+// task belongs to exactly one program and can optionally link to a KPI,
+// milestone, or risk so work ties back to strategy.
+
+export type TaskStatus =
+  | 'todo'
+  | 'in-progress'
+  | 'blocked'
+  | 'in-review'   // assignee marked it done → awaiting head/CEO approval
+  | 'done';       // approved/closed
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+/**
+ * Optional link from a task to a strategy entity.
+ * - kpi       → Kpi.id (1..20)
+ * - risk      → Risk.id (1..15)
+ * - milestone → Milestone.id, which is per-project; programKey disambiguates.
+ * labelSnapshot is captured at link time so the UI degrades gracefully if the
+ * Excel refresh renumbers/renames the entity.
+ */
+export interface TaskLink {
+  kind: 'kpi' | 'milestone' | 'risk';
+  programKey: ProgramKey;
+  refId: number;
+  labelSnapshot: string;
+}
+
+export interface TaskComment {
+  id: number;            // unique within the task
+  author: string;        // username ('system' for automated events)
+  authorName: string;    // display-name snapshot
+  body: string;
+  createdAt: string;     // ISO
+  // System events (status transitions, assignment, approval) are stored as
+  // comments too, so the thread is a single chronological activity feed.
+  system?: {
+    kind: 'created' | 'status' | 'assign' | 'approve' | 'request-changes';
+    from?: string;
+    to?: string;
+  };
+}
+
+export interface Task {
+  id: number;
+  programKey: ProgramKey;        // a task belongs to exactly one program
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assignee: string | null;       // username; null = unassigned (head triage)
+  assigneeName: string | null;   // display-name snapshot
+  createdBy: string;             // username (team head or CEO)
+  dueDate: string | null;        // ISO date (yyyy-mm-dd)
+  link: TaskLink | null;
+  comments: TaskComment[];
+  nextCommentId: number;         // per-task comment id counter
+  createdAt: string;
+  updatedAt: string;
+  reviewRequestedAt?: string | null;
+  closedAt?: string | null;
+  closedBy?: string | null;
 }

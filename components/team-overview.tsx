@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import type { Project, Kpi, Risk, ProgramKey } from '@/lib/types';
+import type { Project, Kpi, Risk, ProgramKey, Task } from '@/lib/types';
 import { StatusBanner } from './status-banner';
 import { TrafficLightStrip } from './traffic-light-strip';
 import { ProjectCharterAccordion } from './project-charter-accordion';
@@ -12,13 +12,15 @@ interface Props {
   project: Project;
   kpis: Kpi[];
   risks: Risk[];
+  tasks?: Task[];
+  viewer?: { username: string; managePrograms: ProgramKey[] };
   stats: {
     onTrack: number; totalKpis: number; atRisk: number; offTrack: number;
     totalRisks: number; criticalRisks: number; totalBudget: number;
   };
 }
 
-export function TeamOverview({ programKey, project, kpis, risks, stats }: Props) {
+export function TeamOverview({ programKey, project, kpis, risks, tasks, viewer, stats }: Props) {
   return (
     <div className="space-y-6">
       <StatusBanner
@@ -38,7 +40,7 @@ export function TeamOverview({ programKey, project, kpis, risks, stats }: Props)
 
       <ProjectCharterAccordion project={project} />
 
-      <AtAGlanceWrapper kpis={kpis} risks={risks} projects={[project]} />
+      <AtAGlanceWrapper kpis={kpis} risks={risks} projects={[project]} tasks={tasks} viewer={viewer} />
     </div>
   );
 }

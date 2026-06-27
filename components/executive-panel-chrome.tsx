@@ -1,14 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { LayoutDashboard, Target, AlertTriangle, CalendarRange, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Target, AlertTriangle, CalendarRange, Sparkles, ListChecks } from 'lucide-react';
 import { PageHeader } from './page-header';
 import { Badge } from './ui/badge';
 import { PanelSubnav } from './panel-subnav';
 import { useI18n } from './i18n-provider';
 
 interface Props {
-  counts: { kpis: number; risks: number; onTrack: number; timeline: number; strategy: number };
+  counts: { kpis: number; risks: number; onTrack: number; timeline: number; strategy: number; tasks: number };
   children: React.ReactNode;
 }
 
@@ -26,6 +26,7 @@ export function ExecutivePanelChrome({ counts, children }: Props) {
     { href: '/dashboard/executive/risks', labelKey: 'subnav.risks' as const, icon: <AlertTriangle className="h-3.5 w-3.5" />, count: counts.risks },
     { href: '/dashboard/executive/timeline', labelKey: 'subnav.timeline' as const, icon: <CalendarRange className="h-3.5 w-3.5" />, count: counts.timeline },
     { href: '/dashboard/executive/strategy', labelKey: 'subnav.strategy' as const, icon: <Sparkles className="h-3.5 w-3.5" />, count: counts.strategy },
+    { href: '/dashboard/executive/tasks', labelKey: 'subnav.tasks' as const, icon: <ListChecks className="h-3.5 w-3.5" />, count: counts.tasks },
   ];
 
   return (

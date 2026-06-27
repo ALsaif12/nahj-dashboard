@@ -4,6 +4,7 @@ node_modules
 .env.local
 *.log
 .DS_Store
+tsconfig.tsbuildinfo
 
 # Locally-written stores — generated on first boot of dev / Render.
 # Render writes to /var/lib/nahj-data so these only exist in local dev anyway.
@@ -13,6 +14,8 @@ data/users.json
 data/users.json.tmp
 data/audit.json
 data/audit.json.tmp
+data/tasks.json
+data/tasks.json.tmp
 
 # Internal scratch from earlier debugging sessions
 nahj_full_dump.txt

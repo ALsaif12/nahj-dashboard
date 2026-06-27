@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Target, AlertTriangle, CalendarRange, Send, User, Building2, Coins, Calendar } from 'lucide-react';
+import { LayoutDashboard, Target, AlertTriangle, CalendarRange, Send, User, Building2, Coins, Calendar, ListChecks } from 'lucide-react';
 import { PageHeader } from './page-header';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
@@ -28,7 +28,7 @@ const PROGRAM_ACCENT: Record<ProgramKey, string> = {
 interface Props {
   programKey: ProgramKey;
   project: Project;
-  counts: { kpis: number; risks: number; milestones: number };
+  counts: { kpis: number; risks: number; milestones: number; tasks: number };
   canSubmit: boolean;
   children: React.ReactNode;
 }
@@ -49,6 +49,7 @@ export function TeamPanelChrome({ programKey, project, counts, canSubmit, childr
     { href: `${base}/kpis`, labelKey: 'subnav.kpis' as const, icon: <Target className="h-3.5 w-3.5" />, count: counts.kpis },
     { href: `${base}/risks`, labelKey: 'subnav.risks' as const, icon: <AlertTriangle className="h-3.5 w-3.5" />, count: counts.risks },
     { href: `${base}/timeline`, labelKey: 'subnav.timeline' as const, icon: <CalendarRange className="h-3.5 w-3.5" />, count: counts.milestones },
+    { href: `${base}/tasks`, labelKey: 'subnav.tasks' as const, icon: <ListChecks className="h-3.5 w-3.5" />, count: counts.tasks },
     ...(canSubmit ? [{ href: `${base}/submit`, labelKey: 'subnav.submit' as const, icon: <Send className="h-3.5 w-3.5" />, count: null as number | null }] : []),
   ];
 

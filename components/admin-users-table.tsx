@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 type ClientUser = Omit<UserRecord, 'password'>;
 
-const ROLES: Role[] = ['ceo', 'program-manager', 'board-member', 'viewer', 'sponsor'];
+const ROLES: Role[] = ['ceo', 'program-manager', 'team-member', 'board-member', 'viewer', 'sponsor'];
 const PROGRAM_KEYS: ProgramKey[] = ['badir', 'risala', 'iktashif'];
 
 interface Props { initialUsers: ClientUser[]; }

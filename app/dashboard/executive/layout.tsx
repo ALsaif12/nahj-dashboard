@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth';
 import { canAccessPanel, landingPath } from '@/lib/permissions';
 import { getPanelData } from '@/lib/data-service';
 import { effectiveActual, ragStatus } from '@/lib/utils';
+import { countOpenByProgram } from '@/lib/tasks-store';
 import { ExecutivePanelChrome } from '@/components/executive-panel-chrome';
 
 export const dynamic = 'force-dynamic';
@@ -21,12 +22,14 @@ export default async function ExecutiveLayout({ children }: { children: React.Re
     return ragStatus(actual, typeof k.annualTarget === 'number' ? k.annualTarget : null) === 'green';
   }).length;
 
+  const openTasks = countOpenByProgram();
   const counts = {
     kpis: visibleKpis.length,
     risks: visibleRisks.length,
     onTrack,
     timeline: 3, // 3 programs
     strategy: workbook.strategy.objectives.length,
+    tasks: openTasks.badir + openTasks.risala + openTasks.iktashif,
   };
 
   return <ExecutivePanelChrome counts={counts}>{children}</ExecutivePanelChrome>;

@@ -36,6 +36,16 @@ function defaultPermissionsFor(role: Role, scope: ProgramKey | null): UserPermis
         canSubmitActuals: true,
         readOnly: false,
       };
+    case 'team-member':
+      // Sees their program; not read-only (must advance their own tasks), but
+      // cannot submit KPI actuals or touch risks (that stays with the head).
+      return {
+        accessibleProgramPanels: scope ? [scope] : [],
+        canAccessExecutive: false,
+        canAccessAdmin: false,
+        canSubmitActuals: false,
+        readOnly: false,
+      };
     case 'board-member':
       return {
         accessibleProgramPanels: ['badir', 'risala', 'iktashif'],
@@ -123,8 +133,39 @@ export function demoUsers(): UserRecord[] {
   ];
 }
 
+// Demo team-members, two per program. Seeded ONCE on first run (when users.json
+// is created) and then treated as regular accounts — NOT canonical-forced — so
+// the CEO can rename, reassign, or deactivate them. Usernames intentionally
+// match the assignees referenced by the tasks-store first-run seed.
+const DEMO_MEMBERS: Array<{ username: string; name: string; scope: ProgramKey }> = [
+  { username: 'badir-m1', name: 'Sara (Badir)', scope: 'badir' },
+  { username: 'badir-m2', name: 'Omar (Badir)', scope: 'badir' },
+  { username: 'risala-m1', name: 'Layla (Risala)', scope: 'risala' },
+  { username: 'risala-m2', name: 'Yousef (Risala)', scope: 'risala' },
+  { username: 'iktashif-m1', name: 'Noura (Iktashif)', scope: 'iktashif' },
+  { username: 'iktashif-m2', name: 'Khalid (Iktashif)', scope: 'iktashif' },
+];
+
+function demoTeamMembers(): UserRecord[] {
+  const now = '2026-01-01T00:00:00.000Z';
+  return DEMO_MEMBERS.map((m) => ({
+    id: `u_${m.username.replace(/-/g, '_')}`,
+    username: m.username,
+    password: '1',
+    name: m.name,
+    email: `${m.username}@nahj.org`,
+    role: 'team-member' as Role,
+    permissions: defaultPermissionsFor('team-member', m.scope),
+    scope: m.scope,
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  }));
+}
+
 function seed(): Store {
-  return { users: demoUsers() };
+  // Built-ins (canonical-forced) + demo members (seeded once, then editable).
+  return { users: [...demoUsers(), ...demoTeamMembers()] };
 }
 
 const DEMO_USERNAMES = new Set(['executive', 'badir', 'risala', 'iktashif']);

@@ -21,6 +21,8 @@ import { Badge } from './ui/badge';
 import { NahjLogo } from './nahj-logo';
 import { useI18n } from './i18n-provider';
 import { LiveUpdateToast } from './live-update-toast';
+import { NotificationBell } from './notification-bell';
+import { ListChecks } from 'lucide-react';
 
 interface NavBadge { onTrack: number; totalKpis: number; openRisks: number; criticalRisks: number; }
 interface NavItem {
@@ -299,6 +301,17 @@ export function Shell({ user, children, loadedAt, badges }: Props) {
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <Badge variant="outline" className="font-mono text-[10px] hidden lg:inline-flex">{user.role.toUpperCase()}</Badge>
+
+            <Link
+              href="/dashboard/my-tasks"
+              className="hidden sm:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              title={t('nav.myTasks')}
+            >
+              <ListChecks className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">{t('nav.myTasks')}</span>
+            </Link>
+
+            <NotificationBell />
 
             <button
               type="button"
