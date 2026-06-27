@@ -26,10 +26,10 @@ export function AdminAccessMatrix({ users }: { users: ClientUser[] }) {
         <CardDescription>{t('admin.access.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="text-[10px] uppercase tracking-wider text-white/55">
             <tr className="border-b border-white/10">
-              <th className="py-2.5 pe-3 text-start">User</th>
+              <th className="py-2.5 pe-3 text-start">{t('admin.access.col.user')}</th>
               <Th>{t('admin.access.col.exec')}</Th>
               <Th>{t('nav.badir')}</Th>
               <Th>{t('nav.risala')}</Th>
@@ -69,7 +69,7 @@ export function AdminAccessMatrix({ users }: { users: ClientUser[] }) {
               );
             })}
             {active.length === 0 && (
-              <tr><td colSpan={7} className="py-12 text-center text-white/55">No active users.</td></tr>
+              <tr><td colSpan={7} className="py-12 text-center text-white/55">{t('admin.access.empty')}</td></tr>
             )}
           </tbody>
         </table>
@@ -79,17 +79,18 @@ export function AdminAccessMatrix({ users }: { users: ClientUser[] }) {
 }
 
 function CellMark({ allowed, readOnly }: { allowed: boolean; readOnly?: boolean }) {
+  const { t } = useI18n();
   if (!allowed) return <X className="inline h-4 w-4 text-white/25" />;
   return (
     <div className="inline-flex items-center justify-center">
       <span
         className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-500/20 border border-emerald-500/40"
         style={{ boxShadow: '0 0 8px rgba(16,185,129,0.35)' }}
-        title={readOnly ? 'Read-only' : 'Full access'}
+        title={readOnly ? t('admin.access.cell.readOnly') : t('admin.access.cell.full')}
       >
         <Check className={cn('h-3.5 w-3.5', readOnly ? 'text-emerald-300/65' : 'text-emerald-300')} />
       </span>
-      {readOnly && <span className="ms-1 text-[9px] uppercase tracking-wider text-white/45">ro</span>}
+      {readOnly && <span className="ms-1 text-[9px] uppercase tracking-wider text-white/45">{t('admin.access.cell.ro')}</span>}
     </div>
   );
 }

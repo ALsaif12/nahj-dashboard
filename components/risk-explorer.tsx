@@ -33,8 +33,11 @@ export function RiskExplorer({ risks }: { risks: Risk[] }) {
             </div>
             <CardDescription>{t('risk.heatmap.subtitle')}</CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <RiskHeatmap risks={risks} onSelect={setSelected} selectedId={selected?.id ?? null} />
+          {/* Scrolls horizontally on narrow screens instead of overflowing. */}
+          <CardContent className="overflow-x-auto">
+            <div className="flex justify-center min-w-[340px]">
+              <RiskHeatmap risks={risks} onSelect={setSelected} selectedId={selected?.id ?? null} />
+            </div>
           </CardContent>
         </Card>
 

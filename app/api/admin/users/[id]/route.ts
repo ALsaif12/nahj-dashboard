@@ -17,9 +17,22 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const body = await req.json().catch(() => null);
   if (!body) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
 
-  // Safety: don't let an admin lock themselves out of the only admin seat.
   const target = findById(params.id);
   if (!target) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  // Safety: don't let the acting CEO lock themselves out of admin access.
+  const editingSelf = user!.username.toLowerCase() === target.username.toLowerCase();
+  if (editingSelf) {
+    const losingAdmin =
+      body.active === false ||
+      (body.permissions && body.permissions.canAccessAdmin === false);
+    if (losingAdmin) {
+      return NextResponse.json(
+        { error: 'You cannot remove your own admin access or deactivate yourself.' },
+        { status: 400 },
+      );
+    }
+  }
 
   try {
     const updated = updateUser(params.id, body);

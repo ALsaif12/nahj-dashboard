@@ -7,6 +7,12 @@ import type { SessionUser } from './types';
 import { findByUsername } from './users-store';
 
 const COOKIE_NAME = 'nahj_session';
+// In production, NAHJ_SESSION_SECRET must be set (render.yaml generates one).
+// If it's somehow missing we still boot — but loudly warn, since the fallback
+// secret is public in the source and would make session tokens forgeable.
+if (process.env.NODE_ENV === 'production' && !process.env.NAHJ_SESSION_SECRET) {
+  console.error('[auth] SECURITY: NAHJ_SESSION_SECRET is not set in production — using an insecure default. Set it in the host environment.');
+}
 const SECRET = new TextEncoder().encode(
   process.env.NAHJ_SESSION_SECRET || 'nahj-dev-secret-change-me-please-32bytes!'
 );

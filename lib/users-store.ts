@@ -63,78 +63,96 @@ function defaultPermissionsFor(role: Role, scope: ProgramKey | null): UserPermis
   }
 }
 
+// The four built-in accounts. Defined as a pure function so they can be used
+// both for first-run seeding AND as a guaranteed fallback (see ensureDemoAccounts).
+export function demoUsers(): UserRecord[] {
+  const now = '2026-01-01T00:00:00.000Z'; // stable timestamp so the records are deterministic
+  return [
+    {
+      id: 'u_executive',
+      username: 'executive',
+      password: process.env.NAHJ_PW_EXEC || '1',
+      name: 'Fahad — Executive Director',
+      email: 'executive@nahj.org',
+      role: 'ceo',
+      permissions: defaultPermissionsFor('ceo', null),
+      scope: null,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'u_badir',
+      username: 'badir',
+      password: process.env.NAHJ_PW_BADIR || '1',
+      name: 'Badir Program Manager',
+      email: 'badir@nahj.org',
+      role: 'program-manager',
+      permissions: defaultPermissionsFor('program-manager', 'badir'),
+      scope: 'badir',
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'u_risala',
+      username: 'risala',
+      password: process.env.NAHJ_PW_RISALA || '1',
+      name: 'Risala Program Manager',
+      email: 'risala@nahj.org',
+      role: 'program-manager',
+      permissions: defaultPermissionsFor('program-manager', 'risala'),
+      scope: 'risala',
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'u_iktashif',
+      username: 'iktashif',
+      password: process.env.NAHJ_PW_IKTASHIF || '1',
+      name: 'Iktashif Nahj Program Manager',
+      email: 'iktashif@nahj.org',
+      role: 'program-manager',
+      permissions: defaultPermissionsFor('program-manager', 'iktashif'),
+      scope: 'iktashif',
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+}
+
 function seed(): Store {
-  const now = new Date().toISOString();
-  return {
-    users: [
-      {
-        id: 'u_executive',
-        username: 'executive',
-        password: process.env.NAHJ_PW_EXEC || '1',
-        name: 'Fahad — Executive Director',
-        email: 'executive@nahj.org',
-        role: 'ceo',
-        permissions: defaultPermissionsFor('ceo', null),
-        scope: null,
-        active: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: 'u_badir',
-        username: 'badir',
-        password: process.env.NAHJ_PW_BADIR || '1',
-        name: 'Badir Program Manager',
-        email: 'badir@nahj.org',
-        role: 'program-manager',
-        permissions: defaultPermissionsFor('program-manager', 'badir'),
-        scope: 'badir',
-        active: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: 'u_risala',
-        username: 'risala',
-        password: process.env.NAHJ_PW_RISALA || '1',
-        name: 'Risala Program Manager',
-        email: 'risala@nahj.org',
-        role: 'program-manager',
-        permissions: defaultPermissionsFor('program-manager', 'risala'),
-        scope: 'risala',
-        active: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: 'u_iktashif',
-        username: 'iktashif',
-        password: process.env.NAHJ_PW_IKTASHIF || '1',
-        name: 'Iktashif Nahj Program Manager',
-        email: 'iktashif@nahj.org',
-        role: 'program-manager',
-        permissions: defaultPermissionsFor('program-manager', 'iktashif'),
-        scope: 'iktashif',
-        active: true,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ],
-  };
+  return { users: demoUsers() };
+}
+
+/**
+ * Guarantee the four built-in accounts always exist. If the persisted
+ * users.json is missing one (corrupt disk, partial write, hand-editing on a
+ * deployed host, etc.), the default is merged back in. Disk versions take
+ * precedence when present, so admin edits to name/role/permissions are kept.
+ * This is what makes the demo logins bulletproof on Render regardless of the
+ * persistent disk's state.
+ */
+function ensureDemoAccounts(users: UserRecord[]): UserRecord[] {
+  const byUsername = new Set(users.map((u) => u.username.toLowerCase()));
+  const missing = demoUsers().filter((d) => !byUsername.has(d.username.toLowerCase()));
+  return missing.length ? [...users, ...missing] : users;
 }
 
 function read(): Store {
   const file = STORE_FILE();
   if (!fs.existsSync(file)) {
     const s = seed();
-    write(s);
+    try { write(s); } catch { /* read-only FS — still usable in memory */ }
     return s;
   }
   try {
     const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw) as Store;
-    if (!parsed.users) return seed();
-    return parsed;
+    if (!parsed.users || !Array.isArray(parsed.users)) return seed();
+    return { users: ensureDemoAccounts(parsed.users) };
   } catch {
     return seed();
   }
@@ -211,9 +229,11 @@ export function updateUser(id: string, input: UpdateUserInput): UserRecord {
   const prev = s.users[idx];
   const role = input.role ?? prev.role;
   const scope = input.scope === undefined ? prev.scope : input.scope;
-  const basePerms = input.role || input.scope !== undefined
-    ? defaultPermissionsFor(role, scope)
-    : prev.permissions;
+  // Only re-derive base permissions when role/scope ACTUALLY change. The edit
+  // dialog sends role+scope on every save, so comparing against prev prevents
+  // a name/email edit from silently resetting custom permission grants.
+  const roleOrScopeChanged = role !== prev.role || scope !== prev.scope;
+  const basePerms = roleOrScopeChanged ? defaultPermissionsFor(role, scope) : prev.permissions;
   const next: UserRecord = {
     ...prev,
     name: input.name ?? prev.name,

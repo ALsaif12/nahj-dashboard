@@ -70,7 +70,7 @@ export function AdminUsersTable({ initialUsers }: Props) {
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead className="text-start text-[10px] uppercase tracking-wider text-white/55">
               <tr className="border-b border-white/10">
                 <Th>{t('admin.users.col.name')}</Th>
@@ -110,7 +110,7 @@ export function AdminUsersTable({ initialUsers }: Props) {
                   <td className="py-2.5 pe-3">
                     {u.permissions.canSubmitActuals && !u.permissions.readOnly
                       ? <span className="inline-flex items-center gap-1 text-emerald-300"><ShieldCheck className="h-3.5 w-3.5" /> {t('admin.users.statusActive')}</span>
-                      : <span className="inline-flex items-center gap-1 text-white/45"><ShieldOff className="h-3.5 w-3.5" /> read-only</span>}
+                      : <span className="inline-flex items-center gap-1 text-white/45"><ShieldOff className="h-3.5 w-3.5" /> {t('admin.users.readOnly')}</span>}
                   </td>
                   <td className="py-2.5 pe-3">
                     <Badge variant={u.active ? 'green' : 'red'}>

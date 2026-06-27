@@ -26,6 +26,17 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const [active, setActive] = React.useState(false);
   const [stepIndex, setStepIndex] = React.useState(0);
   const [ctx, setCtx] = React.useState({ canAdmin: false });
+  const [isDesktop, setIsDesktop] = React.useState(true);
+
+  // Track viewport so the tour can skip desktop-only targets (sidebar/admin) on phones.
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(min-width: 768px)');
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   // Stable, guarded setter: only triggers a re-render if the value actually
   // changed. Prevents any caller-side render loop from cascading.
@@ -33,10 +44,10 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     setCtx((prev) => (prev.canAdmin === c.canAdmin ? prev : c));
   }, []);
 
-  // Filter steps that don't apply (e.g. admin step for non-CEO users).
+  // Filter steps that don't apply (admin gating + desktop-only targets).
   const steps = React.useMemo(
-    () => TOUR_STEPS.filter((s) => !s.showIf || s.showIf(ctx)),
-    [ctx],
+    () => TOUR_STEPS.filter((s) => !s.showIf || s.showIf({ ...ctx, isDesktop })),
+    [ctx, isDesktop],
   );
 
   // Auto-launch disabled — tour only shows when the user clicks "Take a tour"

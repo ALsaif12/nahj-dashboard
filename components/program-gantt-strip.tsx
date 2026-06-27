@@ -66,7 +66,9 @@ export function ProgramGanttStrip({ projects }: { projects: Project[] }) {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="rounded-2xl glass overflow-hidden">
+      {/* Horizontal scroll on narrow screens; the inner timeline keeps a usable min width. */}
+      <div className="rounded-2xl glass overflow-x-auto">
+        <div className="min-w-[640px]">
         <div className="flex items-center border-b border-white/10 bg-white/[0.04]">
           <div className="w-52 px-5 py-3 text-[11px] font-medium uppercase tracking-wider text-white/55">{t('gantt.program')}</div>
           <div className="relative flex-1 h-11">
@@ -221,6 +223,7 @@ export function ProgramGanttStrip({ projects }: { projects: Project[] }) {
           <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm bg-violet-400" />{t('nav.iktashif')}</span>
           <span className="ms-auto flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-white/80" />{t('gantt.legend.milestone')}</span>
           {todayInRange && <span className="flex items-center gap-1.5"><span className="h-3 w-px bg-rag-red" />{t('gantt.legend.today')}</span>}
+        </div>
         </div>
       </div>
     </TooltipProvider>

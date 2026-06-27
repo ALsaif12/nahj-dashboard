@@ -56,19 +56,29 @@ export function TourOverlay() {
     };
     findIt();
 
-    // Reposition on scroll/resize so the highlight tracks the element.
+    // Reposition on scroll/resize — throttled to one update per frame, and a
+    // no-op if the rect hasn't actually moved, to avoid a re-render storm.
+    let moveRaf = 0;
     const onMove = () => {
-      const el = document.querySelector<HTMLElement>(step.target!);
-      if (el) {
+      if (moveRaf) return;
+      moveRaf = requestAnimationFrame(() => {
+        moveRaf = 0;
+        const el = document.querySelector<HTMLElement>(step.target!);
+        if (!el) return;
         const r = el.getBoundingClientRect();
-        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-      }
+        setRect((prev) =>
+          prev && prev.top === r.top && prev.left === r.left && prev.width === r.width && prev.height === r.height
+            ? prev
+            : { top: r.top, left: r.left, width: r.width, height: r.height }
+        );
+      });
     };
     window.addEventListener('scroll', onMove, true);
     window.addEventListener('resize', onMove);
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      if (moveRaf) cancelAnimationFrame(moveRaf);
       window.removeEventListener('scroll', onMove, true);
       window.removeEventListener('resize', onMove);
     };
@@ -86,12 +96,14 @@ export function TourOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [active, next, prev, stop]);
 
-  if (!active || !step) return null;
-  const isCenter = step.placement === 'center' || !step.target;
-  const cardPos = isCenter ? null : placeCard(rect, step.placement ?? 'bottom', dir);
+  // Centered (no spotlight cut-out) for explicit center steps, targetless steps,
+  // OR when a targeted element couldn't be located (e.g. hidden on this viewport).
+  const isCenter = !step || step.placement === 'center' || !step.target || !rect;
+  const cardPos = isCenter || !step ? null : placeCard(rect, step.placement ?? 'bottom', dir);
 
   return (
     <AnimatePresence>
+      {active && step && (
       <motion.div
         key="tour"
         initial={{ opacity: 0 }}
@@ -194,6 +206,7 @@ export function TourOverlay() {
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }

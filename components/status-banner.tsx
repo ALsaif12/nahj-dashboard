@@ -109,7 +109,7 @@ export function StatusBanner({
             whileHover={{ y: -3 }}
             whileTap={{ scale: 0.98 }}
             className={cn(
-              'group relative text-start rounded-2xl p-5 cursor-pointer overflow-hidden',
+              'group relative text-start rounded-2xl p-4 sm:p-5 cursor-pointer overflow-hidden',
               'glass-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nahj-gold/60',
               ti.tone === 'green' && 'hover:shadow-glow-green',
               ti.tone === 'amber' && 'hover:shadow-glow-amber',
@@ -135,10 +135,10 @@ export function StatusBanner({
                   {ti.icon}
                 </div>
               </div>
-              <div className="mt-3 font-serif text-3xl lg:text-4xl font-medium tabular-nums text-white">
+              <div className="mt-2 sm:mt-3 font-serif text-2xl sm:text-3xl lg:text-4xl font-medium tabular-nums text-white leading-tight">
                 {ti.value}
               </div>
-              <div className="mt-1 text-xs text-white/55">
+              <div className="mt-1 text-[11px] sm:text-xs text-white/55 leading-snug">
                 {ti.sub}
               </div>
             </div>

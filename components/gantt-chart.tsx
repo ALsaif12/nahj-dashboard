@@ -53,8 +53,8 @@ export function GanttChart({ milestones, startDate, endDate }: Props) {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="rounded-2xl glass overflow-hidden">
-        <div className="grid" style={{ gridTemplateColumns: 'minmax(220px, 1fr) 3fr' }}>
+      <div className="rounded-2xl glass overflow-x-auto">
+        <div className="grid min-w-[620px]" style={{ gridTemplateColumns: 'minmax(200px, 1fr) 3fr' }}>
           <div className="border-b border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-medium uppercase tracking-wider text-white/55">
             {t('gantt.milestone')}
           </div>

@@ -24,8 +24,9 @@ export function PanelSubnav({ items }: { items: SubNavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <div className="relative mb-6" data-tour="subnav">
-      <div className="glass rounded-2xl p-1.5 inline-flex flex-wrap gap-1 max-w-full">
+    <div className="relative mb-6 -mx-1 px-1 overflow-x-auto" data-tour="subnav">
+      {/* One swipeable row on mobile (no wrap) so the active-pill animation stays clean. */}
+      <div className="glass rounded-2xl p-1.5 inline-flex flex-nowrap gap-1 w-max">
         {items.map((it) => {
           const active = pathname === it.href || pathname.startsWith(`${it.href}/`);
           return (
@@ -33,7 +34,7 @@ export function PanelSubnav({ items }: { items: SubNavItem[] }) {
               key={it.href}
               href={it.href}
               className={cn(
-                'relative inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors',
+                'relative inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap shrink-0',
                 active ? 'text-white' : 'text-white/55 hover:text-white',
               )}
             >

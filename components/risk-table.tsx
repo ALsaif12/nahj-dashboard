@@ -50,7 +50,7 @@ export function RiskTable({ risks, onSelect, selectedId }: { risks: Risk[]; onSe
           placeholder={t('risk.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-9 w-56 rounded-lg glass px-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-nahj-gold/40"
+          className="h-9 w-full sm:w-56 rounded-lg glass px-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-nahj-gold/40"
         />
         {(['', 'critical', 'high', 'medium', 'low'] as const).map((b) => (
           <button
@@ -71,7 +71,7 @@ export function RiskTable({ risks, onSelect, selectedId }: { risks: Risk[]; onSe
 
       <div className="overflow-hidden rounded-2xl glass">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[680px] text-sm">
             <thead className="bg-white/[0.03] text-white/85">
               <tr className="border-b border-white/10">
                 <Th onClick={() => toggleSort('id')} active={sortKey === 'id'}>{t('risk.column.id')}</Th>
@@ -101,7 +101,7 @@ export function RiskTable({ risks, onSelect, selectedId }: { risks: Risk[]; onSe
                 >
                   <td className="px-3 py-2.5 font-mono text-xs text-white/55">R{r.id}</td>
                   <td className="px-3 py-2.5 max-w-md">
-                    <div dir="rtl" lang="ar" className="font-arabic text-sm leading-snug text-white/95">{r.name}</div>
+                    <div dir="rtl" lang="ar" className="font-arabic text-sm leading-snug text-white/95 line-clamp-2">{r.name}</div>
                   </td>
                   <td className="px-3 py-2.5 text-xs">
                     <Badge variant="outline" className="font-medium">{PROGRAM_NAME_TO_KEY[r.program] ? t(PROGRAM_NAME_TO_KEY[r.program]) : r.program}</Badge>

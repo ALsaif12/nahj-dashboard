@@ -10,7 +10,10 @@ import { useI18n } from './i18n-provider';
 import { PROGRAM_NAME_TO_KEY, RISK_TYPE_TO_KEY } from '@/lib/i18n';
 
 export function RiskDetailPanel({ risk, onClose }: { risk: Risk | null; onClose: () => void }) {
-  const { t } = useI18n();
+  const { t, dir } = useI18n();
+  // The panel is anchored to the inline-end edge (right in LTR, left in RTL),
+  // so it must slide in from that same edge.
+  const offscreen = dir === 'rtl' ? '-100%' : '100%';
 
   React.useEffect(() => {
     if (!risk) return;
@@ -29,7 +32,7 @@ export function RiskDetailPanel({ risk, onClose }: { risk: Risk | null; onClose:
             className="fixed inset-0 z-40 bg-nahj-navy-deepest/60 backdrop-blur-sm"
           />
           <motion.aside
-            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            initial={{ x: offscreen }} animate={{ x: 0 }} exit={{ x: offscreen }}
             transition={{ type: 'spring', stiffness: 280, damping: 30 }}
             className="fixed inset-y-0 end-0 z-50 w-full max-w-md glass-strong overflow-y-auto text-white"
           >

@@ -7,7 +7,7 @@ import {
   User, Target, Sigma, ClockAlert, ListChecks,
 } from 'lucide-react';
 import {
-  AreaChart, Area, LineChart, Line, ResponsiveContainer, YAxis, XAxis, ReferenceLine, Tooltip as RTooltip,
+  LineChart, Line, ResponsiveContainer, YAxis, XAxis, ReferenceLine, Tooltip as RTooltip,
 } from 'recharts';
 import { Badge } from './ui/badge';
 import { RagBadge } from './rag-badge';
@@ -141,33 +141,13 @@ export function KpiCard({ kpi, emphasize, delay = 0 }: Props) {
 
                   {filled.length >= 2 && (
                     <div className="h-12 w-32 -mb-1 relative">
-                      <ResponsiveContainer>
-                        <AreaChart data={series} margin={{ top: 6, bottom: 4, left: 0, right: 16 }}>
-                          <defs>
-                            <linearGradient id={sparkGradId} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor={sparkColor} stopOpacity={0.32} />
-                              <stop offset="100%" stopColor={sparkColor} stopOpacity={0} />
-                            </linearGradient>
-                          </defs>
-                          <YAxis hide domain={['auto', 'auto']} />
-                          {annualTarget !== null && (
-                            <ReferenceLine y={annualTarget} stroke="#D4B96A" strokeDasharray="3 3" strokeWidth={1} />
-                          )}
-                          <Area
-                            type="monotone"
-                            dataKey="actual"
-                            stroke={sparkColor}
-                            strokeWidth={2.25}
-                            fill={`url(#${sparkGradId})`}
-                            dot={(p: any) => (
-                              <circle key={`d-${p.index}`} cx={p.cx} cy={p.cy} r={p.index === series.length - 1 ? 3.5 : 2.5} fill={sparkColor} stroke="#0A1628" strokeWidth={1.25} />
-                            )}
-                            connectNulls
-                            isAnimationActive={false}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 text-[9px] font-bold tabular-nums" style={{ color: sparkColor }}>
+                      <Sparkline
+                        values={series.map((s) => s.actual)}
+                        target={annualTarget}
+                        color={sparkColor}
+                        gradId={sparkGradId}
+                      />
+                      <div className="absolute end-0 top-1/2 -translate-y-1/2 text-[9px] font-bold tabular-nums" style={{ color: sparkColor }}>
                         {formatValue(latestActual, kpi.unit)}
                       </div>
                     </div>
@@ -319,6 +299,57 @@ export function KpiCard({ kpi, emphasize, delay = 0 }: Props) {
         </DialogContent>
       </Dialog>
     </TooltipProvider>
+  );
+}
+
+/**
+ * Lightweight pure-SVG sparkline. Replaces a Recharts ResponsiveContainer per
+ * card (which each spin up a ResizeObserver) — on a 20-KPI grid that's a big
+ * mount/perf win, especially on mobile and on every locale switch.
+ */
+function Sparkline({ values, target, color, gradId }: {
+  values: (number | null)[];
+  target: number | null;
+  color: string;
+  gradId: string;
+}) {
+  const W = 128, H = 44, PADX = 4, PADY = 6;
+  // Points present at their quarter index; nulls are skipped but keep x spacing.
+  const pts = values
+    .map((v, i) => ({ v, i }))
+    .filter((p): p is { v: number; i: number } => p.v !== null);
+  if (pts.length < 2) return null;
+
+  const nums = [...pts.map((p) => p.v), ...(target !== null ? [target] : [])];
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  const span = max - min || 1;
+  const n = values.length;
+  const x = (i: number) => PADX + (i / (n - 1)) * (W - PADX * 2);
+  const y = (v: number) => PADY + (1 - (v - min) / span) * (H - PADY * 2);
+
+  const line = pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${x(p.i).toFixed(1)} ${y(p.v).toFixed(1)}`).join(' ');
+  const first = pts[0], last = pts[pts.length - 1];
+  const area = `${line} L ${x(last.i).toFixed(1)} ${H - PADY} L ${x(first.i).toFixed(1)} ${H - PADY} Z`;
+  const targetY = target !== null ? y(target) : null;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-full w-full" preserveAspectRatio="none" aria-hidden>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      {targetY !== null && (
+        <line x1={PADX} y1={targetY} x2={W - PADX} y2={targetY} stroke="#D4B96A" strokeWidth={1} strokeDasharray="3 3" opacity={0.7} />
+      )}
+      <path d={area} fill={`url(#${gradId})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {pts.map((p, idx) => (
+        <circle key={p.i} cx={x(p.i)} cy={y(p.v)} r={idx === pts.length - 1 ? 3 : 2} fill={color} stroke="#0A1628" strokeWidth={1} />
+      ))}
+    </svg>
   );
 }
 

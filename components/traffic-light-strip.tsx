@@ -27,12 +27,47 @@ const TONE_GLOW: Record<string, string> = {
   none: 'none',
 };
 
-export function flashKpiCard(id: number) {
-  const el = document.getElementById(`kpi-${id}`);
-  if (!el) return;
+function applyFlash(el: HTMLElement) {
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   el.classList.add('kpi-flash');
   window.setTimeout(() => el.classList.remove('kpi-flash'), 1700);
+}
+
+/**
+ * Scroll to and highlight a KPI card. If the card isn't on the current view
+ * (e.g. we're on the Overview tab and the grid lives on the KPIs sub-page),
+ * navigate to that panel's KPIs page with a #kpi-N hash and flash on arrival,
+ * so the action always lands the user on the target KPI.
+ */
+export function flashKpiCard(id: number) {
+  const el = document.getElementById(`kpi-${id}`);
+  if (el) { applyFlash(el); return; }
+
+  // Derive the panel base from the current path (/dashboard/<panel>/...).
+  const seg = window.location.pathname.split('/')[2] || 'executive';
+  const target = `/dashboard/${seg}/kpis#kpi-${id}`;
+  // Remember the intended flash; the kpis page reads the hash on load.
+  try { sessionStorage.setItem('nahj_flash_kpi', String(id)); } catch { /* ignore */ }
+  window.location.assign(target);
+}
+
+// On any page load, if a flash was requested via hash/sessionStorage, run it.
+if (typeof window !== 'undefined') {
+  const run = () => {
+    const m = window.location.hash.match(/^#kpi-(\d+)$/);
+    const stored = (() => { try { return sessionStorage.getItem('nahj_flash_kpi'); } catch { return null; } })();
+    const id = m ? m[1] : stored;
+    if (!id) return;
+    const el = document.getElementById(`kpi-${id}`);
+    if (el) {
+      applyFlash(el);
+      try { sessionStorage.removeItem('nahj_flash_kpi'); } catch { /* ignore */ }
+    }
+  };
+  // Defer so the target grid has mounted. Handle both "still loading" and
+  // "already loaded" (client-side nav) cases.
+  if (document.readyState === 'complete') setTimeout(run, 400);
+  else window.addEventListener('load', () => setTimeout(run, 400));
 }
 
 export function TrafficLightStrip({ kpis, groupSize = 10 }: Props) {

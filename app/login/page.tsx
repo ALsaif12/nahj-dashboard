@@ -38,7 +38,8 @@ export default function LoginPage() {
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || t('login.invalid'));
-      router.push(data.landing || '/dashboard/executive');
+      // replace (not push) so the back button doesn't return to /login post-auth.
+      router.replace(data.landing || '/dashboard/executive');
     } catch (e: any) {
       setErr(e.message);
       setBusy(false);

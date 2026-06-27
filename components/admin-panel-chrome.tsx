@@ -21,7 +21,7 @@ export function AdminPanelChrome({ children }: { children: React.ReactNode }) {
       <PageHeader
         title={t('admin.title')}
         description={t('admin.description')}
-        badge={<Badge variant="gold">CEO only</Badge>}
+        badge={<Badge variant="gold">{t('admin.ceoOnly')}</Badge>}
       />
       <PanelSubnav items={items} />
       <div className="space-y-6">{children}</div>

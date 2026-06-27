@@ -17,8 +17,14 @@ export interface TourStep {
   /** Translation keys for the card body. */
   titleKey: TranslationKey;
   bodyKey: TranslationKey;
-  /** Only show this step if the predicate is true (used for admin step). */
-  showIf?: (ctx: { canAdmin: boolean }) => boolean;
+  /** Only show this step if the predicate is true (admin gating, desktop-only targets). */
+  showIf?: (ctx: TourContext) => boolean;
+}
+
+export interface TourContext {
+  canAdmin: boolean;
+  /** True on >= md viewports. The sidebar/admin targets only exist on desktop. */
+  isDesktop: boolean;
 }
 
 export const TOUR_STEPS: TourStep[] = [
@@ -51,6 +57,7 @@ export const TOUR_STEPS: TourStep[] = [
     placement: 'right',
     titleKey: 'tour.sidebar.title',
     bodyKey: 'tour.sidebar.body',
+    showIf: ({ isDesktop }) => isDesktop, // sidebar is hidden below md
   },
   {
     id: 'subnav',
@@ -67,7 +74,7 @@ export const TOUR_STEPS: TourStep[] = [
     placement: 'right',
     titleKey: 'tour.admin.title',
     bodyKey: 'tour.admin.body',
-    showIf: ({ canAdmin }) => canAdmin,
+    showIf: ({ canAdmin, isDesktop }) => canAdmin && isDesktop, // admin link lives in the desktop sidebar
   },
   {
     id: 'locale-toggle',

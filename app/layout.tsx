@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Cairo, Fraunces } from 'next/font/google';
 import './globals.css';
 import { I18nProvider } from '@/components/i18n-provider';
@@ -12,6 +12,14 @@ const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-fraunces', dis
 export const metadata: Metadata = {
   title: 'NAHJ Dashboard — جمعية نهج لتمكين الشباب',
   description: 'Strategy, KPI, risk and program dashboard for NAHJ Youth Empowerment Society',
+};
+
+// Explicit viewport so the dark theme extends into the mobile browser chrome
+// and pinch-zoom stays available for accessibility.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0A1628',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
