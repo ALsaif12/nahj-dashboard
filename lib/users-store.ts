@@ -213,6 +213,22 @@ function ensureDemoAccounts(users: UserRecord[]): UserRecord[] {
   return missing.length ? [...normalized, ...missing] : normalized;
 }
 
+/**
+ * One-time backfill of the demo team-members onto a disk that predates the task
+ * manager (Render's persistent disk already had a users.json with only the four
+ * built-ins, so the first-run seed never added members there). Only fires when
+ * there are ZERO team-members at all, so it never re-creates members the CEO has
+ * deleted (a deactivated member keeps role 'team-member', so it won't reappear).
+ * Returns the list plus whether anything was added (so the caller can persist).
+ */
+function ensureDemoMembers(users: UserRecord[]): { users: UserRecord[]; added: boolean } {
+  if (users.some((u) => u.role === 'team-member')) return { users, added: false };
+  const existing = new Set(users.map((u) => u.username.toLowerCase()));
+  const toAdd = demoTeamMembers().filter((m) => !existing.has(m.username.toLowerCase()));
+  if (!toAdd.length) return { users, added: false };
+  return { users: [...users, ...toAdd], added: true };
+}
+
 function read(): Store {
   const file = STORE_FILE();
   if (!fs.existsSync(file)) {
@@ -224,7 +240,10 @@ function read(): Store {
     const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw) as Store;
     if (!parsed.users || !Array.isArray(parsed.users)) return seed();
-    return { users: ensureDemoAccounts(parsed.users) };
+    const withBuiltins = ensureDemoAccounts(parsed.users);
+    const { users: withMembers, added } = ensureDemoMembers(withBuiltins);
+    if (added) { try { write({ users: withMembers }); } catch { /* read-only FS */ } }
+    return { users: withMembers };
   } catch {
     return seed();
   }
